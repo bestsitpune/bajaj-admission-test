@@ -314,14 +314,11 @@ input[type="radio"]{display:none;}
   <div id="adminDashboard" style="display:none;">
     <div class="card">
       <!-- Google Sheets Setup -->
-      <div class="sheets-setup" id="sheetsSetupBox">
-        <strong>📊 Google Sheets Integration</strong><br>
-        To send results automatically to your Google Sheet:<br>
-        1. Create a Google Sheet &amp; go to <strong>Extensions → Apps Script</strong><br>
-        2. Paste the Apps Script code (see README below) and <strong>Deploy as Web App</strong> (anyone, no auth)<br>
-        3. Paste the Web App URL here: <input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;margin-top:6px;font-size:12px;padding:6px 10px;">
+      <div class="sheets-setup" id="sheetsSetupBox" style="border-left:4px solid #2e7d32;background:#e8f5e9;color:#1b5e20;">
+        <strong>✅ Google Sheets – Already Connected!</strong><br>
+        Results are automatically sent to your Google Sheet. URL is pre-configured below. You can update it if needed: <input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;margin-top:6px;font-size:12px;padding:6px 10px;">
         <button onclick="saveSheetUrl()" style="margin-top:6px;padding:5px 14px;background:#1565c0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Save URL</button>
-        <div class="gs-status" id="gsStatus"></div>
+        <div class="gs-status" id="gsStatus"><span class="gs-ok">✔ Connected to: bestsitpune Google Sheet — results saved automatically on every submission.</span></div>
       </div>
 
       <div class="admin-header">
@@ -405,6 +402,7 @@ const ADMIN_PASS   = "BEST@2024";
 const STORAGE_KEY  = "best_admissions_v3";
 const SUBMITTED_KEY= "best_submitted_v3";
 const SHEET_URL_KEY= "best_sheet_url";
+const HARDCODED_SHEET_URL = "https://script.google.com/macros/s/AKfycbyJKH3dSQx366p_q_xRN8kFpQkMteX5_5UwvJaokB56TrUwOpgYEhtpt93Wnp7rgug1Vw/exec";
 
 let current = 0;
 let answers  = new Array(30).fill(null);
@@ -420,9 +418,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   // Set apps-script README
   document.getElementById('appsScriptCode').textContent = getAppsScriptCode();
-  // Restore saved sheet URL
-  const saved = localStorage.getItem(SHEET_URL_KEY);
-  if (saved) document.getElementById('sheetsUrl').value = saved;
+  // Pre-fill Google Sheet URL
+  const saved = localStorage.getItem(SHEET_URL_KEY) || HARDCODED_SHEET_URL;
+  document.getElementById('sheetsUrl').value = saved;
+  localStorage.setItem(SHEET_URL_KEY, saved);
 });
 
 // ── Registration ─────────────────────────────────────────────
@@ -550,7 +549,7 @@ async function submitTest() {
   localStorage.setItem(SUBMITTED_KEY, 'yes');
 
   // Send to Google Sheets
-  const sheetUrl = localStorage.getItem(SHEET_URL_KEY);
+  const sheetUrl = HARDCODED_SHEET_URL || localStorage.getItem(SHEET_URL_KEY);
   if (sheetUrl) {
     try {
       await fetch(sheetUrl, {
